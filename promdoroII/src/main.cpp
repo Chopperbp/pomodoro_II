@@ -38,18 +38,18 @@ void setup()
   ledcAttachPin(buzzer, channel);
 
   strip.begin();
-  strip.show(); // Initialize all pixels to 'off'
-
+  strip.clear();
+  display.clear();
+  display.setBrightness(5);
   pinMode(greenLed, OUTPUT);
   pinMode(redLed, OUTPUT);
   pinMode(button1, INPUT);
   pinMode(button2, INPUT);
-  digitalWrite(greenLed, HIGH);
-  digitalWrite(redLed, HIGH);
-  display.setBrightness(0x0a); //set the diplay to maximum brightness
+  Serial.println("Hello world!");
 }
 void colorWipe(uint32_t c, uint8_t wait)
 {
+  strip.clear();
   for (uint16_t i = 0; i < strip.numPixels(); i++)
   {
     strip.setPixelColor(i, c);
@@ -57,38 +57,42 @@ void colorWipe(uint32_t c, uint8_t wait)
     delay(wait);
   }
 }
-
+void colorWipeDown(uint32_t c, uint8_t wait)
+{
+  strip.clear();
+  for (int16_t i = strip.numPixels(); i >= 0; i--)
+  {
+    strip.setPixelColor(i, c);
+    strip.show();
+    delay(wait);
+  }
+}
 void loop()
 {
-  Serial.println("Hello world!");
-  // Some example procedures showing how to display to the pixels:
-  colorWipe(strip.Color(255, 0, 0), 50);                // Red
-  colorWipe(strip.Color(0, 255, 0), 50);                // Green
-  colorWipe(strip.Color(0, 0, 255), 50);                // Blue
-  for (numCounter = 0; numCounter < 9999; numCounter++) //Iterate numCounter
-  {
-    if (digitalRead(button1) == HIGH)
-    {
-      digitalWrite(greenLed, HIGH);
-    }
-    else
-    {
-      digitalWrite(greenLed, LOW);
-    }
-    if (digitalRead(button2) == HIGH)
-    {
-      digitalWrite(redLed, HIGH);
-    }
-    else
-    {
-      digitalWrite(redLed, LOW);
-    }
-    display.showNumberDecEx(numCounter,0b01000000); //Display the numCounter value;
 
-    // ledcWrite(channel, 10);
-    // delay(50);
-    // ledcWriteTone(channel, 0);
-    //delay(500);
+  // Some example procedures showing how to display to the pixels:
+  if (digitalRead(button1) == HIGH)
+  {
+    digitalWrite(greenLed, HIGH);
+    digitalWrite(redLed, LOW);
+    colorWipe(strip.Color(0, 15, 0), 20); // Green
+    numCounter++;
+    ledcWrite(channel, 10);
+    ledcWriteNote(channel, NOTE_A, 5);
+    delay(50);
+    ledcWrite(channel, 0);
   }
+  if (digitalRead(button2) == HIGH)
+  {
+    digitalWrite(redLed, HIGH);
+    digitalWrite(greenLed, LOW);
+    colorWipeDown(strip.Color(22, 6, 0), 20); // Red
+    numCounter--;
+    ledcWrite(channel, 10);
+    ledcWriteNote(channel, NOTE_A, 6);
+    delay(50);
+    ledcWrite(channel, 0);
+  }
+  display.showNumberDec(numCounter);
 }
 // Fill the dots one after the other with a color
