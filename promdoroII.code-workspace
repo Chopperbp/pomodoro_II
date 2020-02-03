@@ -4,5 +4,9 @@
 			"path": "promdoroII"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"functional": "cpp"
+		}
+	}
 }
