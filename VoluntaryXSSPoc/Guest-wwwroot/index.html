@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" href="https://localhost:6001/bulma.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <script async type="text/javascript" src="https://localhost:6001/index1.js"></script>
+    <script src="https://localhost:6001/vanilla-picker.js"></script>
+    <script src="https://localhost:6001/iro.js"></script>
+    <title>Document 2</title>
+</head>
+<body style="display: none">
+    <section class="hero  is-primary">
+        <div class="container has-text-centered">
+            <h1 class="title">
+                Hello World
+            </h1>
+            <p class="subtitle">
+                My first website with <strong>Bulma</strong>!
+            </p>
+            <button class="button is-primary">
+                Primary button
+            </button>
+        </div>
+    </section>
+    <span class="icon has-text-info">
+        <i class="fas fa-info-circle"></i>
+    </span>
+    <div id="parent">Click me</div>
+    <div class="colorPicker"></div>
+    <script type="text/javascript">
+        window.addEventListener('load', (event) => {
+            console.log('load\n');
+        });
+
+        document.addEventListener('readystatechange', (event) => {
+            console.log(`readystate : ${document.readyState}`);
+            document.body.style.display = "block";
+        });
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            console.log(`DOMContentLoaded`);
+            // Create a new Picker instance and set the parent element.
+            // By default, the color picker is a popup which appears when you click the parent.
+            var parent = document.querySelector('#parent');
+            var picker = new Picker({
+                parent: parent,
+                alpha: false
+            });
+
+
+            // You can do what you want with the chosen color using two callbacks: onChange and onDone.
+            let lastrun = new Date().getTime();
+            picker.onChange = async function (color) {
+                let currentrun = new Date().getTime();
+                if (currentrun - lastrun > 500) {
+                    lastrun = currentrun;
+                    parent.style.background = color.rgbaString;
+                    await fetch("http://myesp32.local/rest/endpoint ", {
+                        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                        mode: 'cors', // no-cors, *cors, same-origin
+                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                        credentials: 'same-origin', // include, *same-origin, omit
+                        headers: new Headers({ 'content-type': 'application/json' }),
+                        body: JSON.stringify({ "R": color.rgba[0], "G": color.rgba[1], "B": color.rgba[2], "I": 0 }) // body data type must match "Content-Type" header
+                    });
+
+                }
+            };
+            picker.onDone = function (color) {
+                parent.style.background = color.rgbaString;
+                fetch("http://myesp32.local/rest/endpoint ", {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    mode: 'cors', // no-cors, *cors, same-origin
+                    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                    credentials: 'same-origin', // include, *same-origin, omit
+                    headers: new Headers({ 'content-type': 'application/json' }),
+                    body: JSON.stringify({ "R": color.rgba[0], "G": color.rgba[1], "B": color.rgba[2], "I": 0 }) // body data type must match "Content-Type" header
+                });
+            };
+            var colorPicker = new iro.ColorPicker(".colorPicker", {
+                // color picker options
+                // Option guide: https://iro.js.org/guide.html#color-picker-options
+                width: 280,
+                color: "rgb(255, 0, 0)",
+                borderWidth: 1,
+                borderColor: "#fff",
+            });
+            colorPicker.on(["color:init", "color:change"], async function (color) {
+                console.log(color);
+                let currentrun = new Date().getTime();
+                if (currentrun - lastrun > 100) {
+                    lastrun = currentrun;
+                    parent.style.background = color.rgbaString;
+                    await fetch("http://myesp32.local/rest/endpoint ", {
+                        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                        mode: 'cors', // no-cors, *cors, same-origin
+                        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                        credentials: 'same-origin', // include, *same-origin, omit
+                        headers: new Headers({ 'content-type': 'application/json' }),
+                        body: JSON.stringify({ "R": color.rgb.r, "G": color.rgb.g, "B": color.rgb.b, "I": 0 }) // body data type must match "Content-Type" header
+                    });
+
+                }
+            });
+            // onDone is similar to onChange, but only called when you click 'Ok'.
+        });
+    </script>
+    <script type="text/javascript" src="https://localhost:6001/index.js"></script>
+</body>
+</html>
